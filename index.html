@@ -2,42 +2,54 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>発明AIコーチ</title>
+<title>発明アドバイスAI</title>
 
 <style>
-
 body{
-font-family:sans-serif;
-margin:40px;
-background:#f2f4f8;
+font-family: sans-serif;
+background:#f4f6fb;
+text-align:center;
+padding:40px;
 }
 
 .container{
-max-width:700px;
-margin:auto;
 background:white;
 padding:30px;
 border-radius:10px;
+max-width:600px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 textarea{
 width:100%;
 height:120px;
+font-size:16px;
+padding:10px;
 }
 
 button{
-margin-top:10px;
-padding:10px 20px;
+background:#4CAF50;
+color:white;
+border:none;
+padding:12px 20px;
 font-size:16px;
+margin-top:10px;
+cursor:pointer;
+border-radius:6px;
 }
 
-.result{
+button:hover{
+background:#45a049;
+}
+
+#result{
 margin-top:20px;
-background:#eef3ff;
-padding:20px;
-white-space:pre-line;
+text-align:left;
+background:#f0f3ff;
+padding:15px;
+border-radius:8px;
 }
-
 </style>
 
 </head>
@@ -46,17 +58,17 @@ white-space:pre-line;
 
 <div class="container">
 
-<h1>発明AIコーチ</h1>
+<h1>発明アドバイスAI</h1>
 
-<p>あなたの発明を書いてください</p>
+<p>あなたの発明アイデアを書いてください</p>
 
-<textarea id="idea"></textarea>
+<textarea id="idea" placeholder="例：自動で宿題を整理してくれるスマートペン"></textarea>
 
 <br>
 
 <button onclick="askAI()">AIに相談</button>
 
-<div id="result" class="result"></div>
+<div id="result"></div>
 
 </div>
 
@@ -64,11 +76,11 @@ white-space:pre-line;
 
 async function askAI(){
 
-let idea=document.getElementById("idea").value;
+const idea=document.getElementById("idea").value;
 
-let response=await fetch(
-"https://ai-server-1-69pd.onrender.com/api",
-{
+document.getElementById("result").innerText="AIが考えています...";
+
+const res=await fetch("https://ai-server-1-69pd.onrender.com/api",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -76,9 +88,9 @@ headers:{
 body:JSON.stringify({idea:idea})
 });
 
-let data=await response.json();
+const data=await res.json();
 
-document.getElementById("result").innerText=data.reply;
+document.getElementById("result").innerText=data.advice;
 
 }
 
