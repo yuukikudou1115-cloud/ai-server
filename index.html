@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>発明アドバイスAI</title>
+<title>発明アイデア評価AI</title>
 
 <style>
+
 body{
-font-family: sans-serif;
+font-family:sans-serif;
 background:#f4f6fb;
-text-align:center;
 padding:40px;
 }
 
@@ -16,16 +16,28 @@ padding:40px;
 background:white;
 padding:30px;
 border-radius:10px;
-max-width:600px;
+max-width:800px;
 margin:auto;
 box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
-textarea{
+h1{
+text-align:center;
+}
+
+label{
+font-weight:bold;
+}
+
+textarea,input{
 width:100%;
-height:120px;
-font-size:16px;
 padding:10px;
+margin-bottom:15px;
+font-size:15px;
+}
+
+textarea{
+height:90px;
 }
 
 button{
@@ -34,39 +46,59 @@ color:white;
 border:none;
 padding:12px 20px;
 font-size:16px;
-margin-top:10px;
 cursor:pointer;
 border-radius:6px;
 }
 
 button:hover{
-background:#45a049;
+background:#43a047;
 }
 
 #result{
-margin-top:20px;
-text-align:left;
+margin-top:30px;
 background:#f0f3ff;
-padding:15px;
+padding:20px;
 border-radius:8px;
+white-space:pre-wrap;
 }
-</style>
 
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>発明アドバイスAI</h1>
+<h1>発明アイデア評価AI</h1>
 
-<p>あなたの発明アイデアを書いてください</p>
+<label>名前</label>
+<input id="name">
 
-<textarea id="idea" placeholder="例：自動で宿題を整理してくれるスマートペン"></textarea>
+<label>発明の名前</label>
+<input id="title">
 
-<br>
+<label>発明の概要</label>
+<textarea id="summary"></textarea>
 
-<button onclick="askAI()">AIに相談</button>
+<label>解決したい問題</label>
+<textarea id="problem"></textarea>
+
+<label>対象となる人</label>
+<textarea id="target"></textarea>
+
+<label>既存のものと異なる点（新規性）</label>
+<textarea id="novelty"></textarea>
+
+<label>工夫した点・使う技術</label>
+<textarea id="tech"></textarea>
+
+<label>実現するために必要なこと</label>
+<textarea id="need"></textarea>
+
+<label>この発明によってどのような影響があるか</label>
+<textarea id="impact"></textarea>
+
+<button onclick="askAI()">AIに評価してもらう</button>
 
 <div id="result"></div>
 
@@ -76,21 +108,33 @@ border-radius:8px;
 
 async function askAI(){
 
-const idea=document.getElementById("idea").value;
-
 document.getElementById("result").innerText="AIが考えています...";
+
+const data={
+
+name:document.getElementById("name").value,
+title:document.getElementById("title").value,
+summary:document.getElementById("summary").value,
+problem:document.getElementById("problem").value,
+target:document.getElementById("target").value,
+novelty:document.getElementById("novelty").value,
+tech:document.getElementById("tech").value,
+need:document.getElementById("need").value,
+impact:document.getElementById("impact").value
+
+};
 
 const res=await fetch("https://ai-server-1-69pd.onrender.com/ai",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify({idea:idea})
+body:JSON.stringify(data)
 });
 
-const data=await res.json();
+const result=await res.json();
 
-document.getElementById("result").innerText=data.advice;
+document.getElementById("result").innerText=result.advice;
 
 }
 
