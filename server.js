@@ -1,11 +1,15 @@
 import express from "express";
 import cors from "cors";
-import fetch from "node-fetch";
+import OpenAI from "openai";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+const client = new OpenAI({
+apiKey: process.env.OPENAI_API_KEY
+});
 
 app.get("/", (req,res)=>{
 res.send("AIサーバーは正常に動いています");
@@ -13,57 +17,45 @@ res.send("AIサーバーは正常に動いています");
 
 app.post("/ai", async (req,res)=>{
 
-const idea = req.body.idea;
-
 try{
 
-const response = await fetch("https://api.openai.com/v1/chat/completions",{
+const idea = req.body.idea;
 
-method:"POST",
-
-headers:{
-"Content-Type":"application/json",
-"Authorization":`Bearer ${process.env.OPENAI_API_KEY}`
-},
-
-body:JSON.stringify({
-
+const completion = await client.chat.completions.create({
 model:"gpt-4o-mini",
-
-messages:[{
+messages:[
+{
 role:"system",
-content:"あなたは発明コンテストの審査員です。高校生の発明を評価してください。"
+content:"あなたは発明コンテストの審査員です。高校生の発明アイデアを評価してください。"
 },
 {
 role:"user",
 content:`次の発明アイデアを評価してください。
 
-発明:
+発明アイデア:
 ${idea}
 
-以下の形式で回答してください。
+以下の形式で答えてください。
 
 ①新規性（10点満点）
 ②実現可能性（10点満点）
 ③社会貢献（10点満点）
 ④改善アドバイス
 `
-}]
-
-})
-
+}
+]
 });
 
-const data = await response.json();
+res.json({
+advice:completion.choices[0].message.content
+});
 
-const advice = data.choices[0].message.content;
+}catch(error){
 
-res.json({advice: advice});
-
-}catch(e){
+console.log(error);
 
 res.json({
-advice:"AI評価に失敗しました。APIキーを確認してください。"
+advice:"AI評価でエラーが発生しました"
 });
 
 }
