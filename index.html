@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>発明アイデア評価AI</title>
+<title>知的財産アイディア診断AI</title>
 
 <style>
 
@@ -69,7 +69,7 @@ white-space:pre-wrap;
 
 <div class="container">
 
-<h1>発明アイデア評価AI</h1>
+<h1>知的財産アイディア診断AI</h1>
 
 <label>名前</label>
 <input id="name">
@@ -98,7 +98,7 @@ white-space:pre-wrap;
 <label>この発明によってどのような影響があるか</label>
 <textarea id="impact"></textarea>
 
-<button onclick="askAI()">AIに評価してもらう</button>
+<button onclick="askAI()">診断</button>
 
 <div id="result"></div>
 
@@ -108,31 +108,53 @@ white-space:pre-wrap;
 
 async function askAI(){
 
-document.getElementById("result").innerText="AIが考えています...";
+document.getElementById("result").innerText="AIが診断しています...";
 
-const data={
+const idea = `
+名前: ${document.getElementById("name").value}
 
-name:document.getElementById("name").value,
-title:document.getElementById("title").value,
-summary:document.getElementById("summary").value,
-problem:document.getElementById("problem").value,
-target:document.getElementById("target").value,
-novelty:document.getElementById("novelty").value,
-tech:document.getElementById("tech").value,
-need:document.getElementById("need").value,
-impact:document.getElementById("impact").value
+発明名:
+${document.getElementById("title").value}
 
-};
+概要:
+${document.getElementById("summary").value}
 
-const res=await fetch("https://ai-server-1-69pd.onrender.com/ai",{
+解決したい問題:
+${document.getElementById("problem").value}
+
+対象:
+${document.getElementById("target").value}
+
+新規性:
+${document.getElementById("novelty").value}
+
+技術:
+${document.getElementById("tech").value}
+
+実現条件:
+${document.getElementById("need").value}
+
+社会への影響:
+${document.getElementById("impact").value}
+
+この発明について次の5つを、中学生や高校生でもわかる言葉で説明してください。
+
+①既存のアイデアや商品との似ている点  
+②実現する上での問題点  
+③改善のヒント  
+④特許になりそうか（理由も）  
+⑤アイデアの評価（100点満点）
+`;
+
+const res = await fetch("https://ai-server-1-69pd.onrender.com/ai",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify(data)
+body:JSON.stringify({idea:idea})
 });
 
-const result=await res.json();
+const result = await res.json();
 
 document.getElementById("result").innerText=result.advice;
 
