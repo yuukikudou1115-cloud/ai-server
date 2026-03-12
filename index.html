@@ -4,25 +4,28 @@
 <meta charset="UTF-8">
 <title>知的財産アイディア診断AI</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 
 body{
 font-family:sans-serif;
-background:#f4f6fb;
+background:linear-gradient(120deg,#6fa8ff,#b6d0ff);
 padding:40px;
 }
 
 .container{
 background:white;
 padding:30px;
-border-radius:10px;
-max-width:800px;
+border-radius:12px;
+max-width:850px;
 margin:auto;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
+box-shadow:0 6px 20px rgba(0,0,0,0.15);
 }
 
 h1{
 text-align:center;
+color:#2a4a9b;
 }
 
 label{
@@ -34,29 +37,36 @@ width:100%;
 padding:10px;
 margin-bottom:15px;
 font-size:15px;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
 textarea{
 height:90px;
 }
 
+.big{
+height:160px;
+}
+
 button{
-background:#4CAF50;
+background:#2a6df4;
 color:white;
 border:none;
 padding:12px 20px;
 font-size:16px;
 cursor:pointer;
 border-radius:6px;
+margin-right:10px;
 }
 
 button:hover{
-background:#43a047;
+background:#1f55c9;
 }
 
 #result{
 margin-top:30px;
-background:#f0f3ff;
+background:#eef2ff;
 padding:20px;
 border-radius:8px;
 white-space:pre-wrap;
@@ -77,14 +87,17 @@ white-space:pre-wrap;
 <label>発明の名前</label>
 <input id="title">
 
-<label>発明の概要</label>
-<textarea id="summary"></textarea>
+<label>発明の概要（具体的に、200字以上）</label>
+<textarea id="summary" class="big"></textarea>
 
 <label>解決したい問題</label>
 <textarea id="problem"></textarea>
 
 <label>対象となる人</label>
 <textarea id="target"></textarea>
+
+<label>現在ある製品の中で最も類似しているもの</label>
+<textarea id="similar"></textarea>
 
 <label>既存のものと異なる点（新規性）</label>
 <textarea id="novelty"></textarea>
@@ -99,6 +112,8 @@ white-space:pre-wrap;
 <textarea id="impact"></textarea>
 
 <button onclick="askAI()">診断</button>
+<button onclick="saveData()">保存</button>
+<button onclick="exportPDF()">PDF出力</button>
 
 <div id="result"></div>
 
@@ -106,44 +121,83 @@ white-space:pre-wrap;
 
 <script>
 
+function getData(){
+
+return {
+name:document.getElementById("name").value,
+title:document.getElementById("title").value,
+summary:document.getElementById("summary").value,
+problem:document.getElementById("problem").value,
+target:document.getElementById("target").value,
+similar:document.getElementById("similar").value,
+novelty:document.getElementById("novelty").value,
+tech:document.getElementById("tech").value,
+need:document.getElementById("need").value,
+impact:document.getElementById("impact").value,
+result:document.getElementById("result").innerText
+};
+
+}
+
+function saveData(){
+
+localStorage.setItem("inventionData",JSON.stringify(getData()));
+
+}
+
+function loadData(){
+
+const data=JSON.parse(localStorage.getItem("inventionData"));
+
+if(!data) return;
+
+document.getElementById("name").value=data.name||"";
+document.getElementById("title").value=data.title||"";
+document.getElementById("summary").value=data.summary||"";
+document.getElementById("problem").value=data.problem||"";
+document.getElementById("target").value=data.target||"";
+document.getElementById("similar").value=data.similar||"";
+document.getElementById("novelty").value=data.novelty||"";
+document.getElementById("tech").value=data.tech||"";
+document.getElementById("need").value=data.need||"";
+document.getElementById("impact").value=data.impact||"";
+
+}
+
 async function askAI(){
 
 document.getElementById("result").innerText="AIが診断しています...";
 
+const data=getData();
+
 const idea = `
-名前: ${document.getElementById("name").value}
+名前:${data.name}
 
-発明名:
-${document.getElementById("title").value}
+発明名:${data.title}
 
-概要:
-${document.getElementById("summary").value}
+概要:${data.summary}
 
-解決したい問題:
-${document.getElementById("problem").value}
+解決したい問題:${data.problem}
 
-対象:
-${document.getElementById("target").value}
+対象:${data.target}
 
-新規性:
-${document.getElementById("novelty").value}
+類似製品:${data.similar}
 
-技術:
-${document.getElementById("tech").value}
+新規性:${data.novelty}
 
-実現条件:
-${document.getElementById("need").value}
+技術:${data.tech}
 
-社会への影響:
-${document.getElementById("impact").value}
+実現条件:${data.need}
 
-この発明について次の5つを、中学生や高校生でもわかる言葉で説明してください。
+社会への影響:${data.impact}
 
-①既存のアイデアや商品との似ている点  
-②実現する上での問題点  
-③改善のヒント  
-④特許になりそうか（理由も）  
-⑤アイデアの評価（100点満点）
+この発明について次を中高生にもわかる言葉で説明してください。
+
+①既存の製品との類似性
+②実現する上での問題
+③改善のヒント
+④特許可能性
+⑤評価（100点満点）
 `;
 
 const res = await fetch("https://ai-server-1-69pd.onrender.com/ai",{
@@ -159,6 +213,60 @@ const result = await res.json();
 document.getElementById("result").innerText=result.advice;
 
 }
+
+function exportPDF(){
+
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+const data=getData();
+
+let text=`
+
+知的財産アイディア診断レポート
+
+名前
+${data.name}
+
+発明名
+${data.title}
+
+発明概要
+${data.summary}
+
+解決したい問題
+${data.problem}
+
+対象
+${data.target}
+
+類似製品
+${data.similar}
+
+新規性
+${data.novelty}
+
+技術
+${data.tech}
+
+実現条件
+${data.need}
+
+社会への影響
+${data.impact}
+
+AI診断結果
+${data.result}
+
+`;
+
+doc.text(text,10,10);
+
+doc.save("知的財産アイディア診断レポート.pdf");
+
+}
+
+loadData();
 
 </script>
 
